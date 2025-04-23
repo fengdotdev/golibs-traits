@@ -1,4 +1,4 @@
-package golibstraits
+package trait
 
 type JSONSerializer interface {
 	JSONDeserializable

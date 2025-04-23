@@ -1,4 +1,5 @@
-package golibstraits
+package trait
+
 
 type Option[T any] interface {
 	IsSome() bool // IsSome returns true if the Option is Some

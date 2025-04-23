@@ -1,4 +1,4 @@
-package golibstraits
+package trait
 
 type MapTypeStringerSerializer interface {
 	MapTypeStringerDeserializable

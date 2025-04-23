@@ -1,4 +1,4 @@
-package golibstraits
+package trait
 
 type Result[CONTENT any] interface {
 	ValueOrPanic() CONTENT      // returns the value or panics if the value is not valid

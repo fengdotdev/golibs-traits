@@ -1,4 +1,4 @@
-package golibstraits
+package trait
 
 type Validable[SELF any] interface {
 	IsValid() bool

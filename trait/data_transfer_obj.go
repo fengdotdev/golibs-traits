@@ -1,4 +1,4 @@
-package golibstraits
+package trait
 
 type DataTransferObject[DTO any] interface {
 	ToDTO() (DTO, error)

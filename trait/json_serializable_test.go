@@ -1,10 +1,10 @@
-package golibstraits_test
+package trait_test
 
 import (
 	"encoding/json"
 	"testing"
 
-	trait "github.com/fengdotdev/golibs-traits"
+	"github.com/fengdotdev/golibs-traits/trait"
 )
 
 type Foo struct {

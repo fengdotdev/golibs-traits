@@ -1,4 +1,4 @@
-package golibstraits
+package trait
 
 // ex:  1 =>  typename: "int", value: "1"
 // ex fancymap => typename: "json", value: "{\"fancy\": \"map\"}"

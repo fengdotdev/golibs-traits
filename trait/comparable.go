@@ -1,4 +1,4 @@
-package golibstraits
+package trait
 
 type Comparable[SELF any] interface {
 	AreEqual(other SELF) bool
