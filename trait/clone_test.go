@@ -17,38 +17,39 @@ func (s *Shoe) Clone() Shoe {
 
 type CloneableShoe = trait.Cloneable[Shoe]
 
-func TestClone_Shoe(t *testing.T) {
-
-
+// TestShoeClonability verifies that Shoe correctly implements the Cloneable interface
+func TestShoeClonability(t *testing.T) {
 	var _ CloneableShoe = &Shoe{}
-	var misterytrait trait.Cloneable[Shoe] = &Shoe{}
-	assert.NotNil(t, misterytrait)
+	var cloneableShoe trait.Cloneable[Shoe] = &Shoe{}
+	assert.NotNil(t, cloneableShoe)
 	assert.NotNil(t, &Shoe{})
+}
 
-	runningshoe := NewSneakers()
+// TestShoeClone tests the cloning functionality for the Shoe type
+func TestShoeClone(t *testing.T) {
+	// Arrange
+	original := NewSneakers()
 
-	// Clone the running shoe
+	// Act
+	clone := original.Clone()
 
-	clonedShoe := runningshoe.Clone()
+	// Assert - Verify content equality
+	assert.EqualWithMessage(t, original, clone, "expected cloned object to have the same content")
 
-	// basic equality
-	assert.EqualWithMessage(t, runningshoe, clonedShoe, "expected the same")
+	// Verify that they are different objects in memory
+	assert.NotEqualWithMessage(t, &original, &clone, fmt.Sprintf("expected different memory addresses for %v and %v", &original, &clone))
 
-	// memory address
-	assert.NotEqualWithMessage(t, &runningshoe, &clonedShoe, fmt.Sprintf("expected different memory address for %v and %v", &runningshoe, &clonedShoe))
-	assert.EqualWithMessage(t, runningshoe.size, clonedShoe.size, fmt.Sprintf("expected same size for %v and %v", runningshoe, clonedShoe))
+	// Verify that the fields were copied correctly
+	assert.EqualWithMessage(t, original.size, clone.size, fmt.Sprintf("expected same size for %v and %v", original.size, clone.size))
+	assert.EqualWithMessage(t, original.model, clone.model, fmt.Sprintf("expected same model for %v and %v", original.model, clone.model))
 
-	assert.EqualWithMessage(t, runningshoe.model, clonedShoe.model, fmt.Sprintf("expected same model for %v and %v ", runningshoe.model, clonedShoe.model))
+	// Act - Modify the clone
+	clone.size = 44
+	clone.model = "ClonedSneakers"
 
-	// Change the size of the cloned shoe
-	clonedShoe.size = 44
-
-	assert.NotEqualWithMessage(t, runningshoe.size, clonedShoe.size, fmt.Sprintf("expected different size for %v and %v", runningshoe, clonedShoe))
-
-	clonedShoe.model = "ClonedSneakers"
-
-	assert.NotEqualWithMessage(t, runningshoe.model, clonedShoe.model, fmt.Sprintf("expected different model for %v and %v", runningshoe, clonedShoe))
-
+	// Assert - Verify that the original hasn't changed
+	assert.NotEqualWithMessage(t, original.size, clone.size, fmt.Sprintf("expected different size after modification for %v and %v", original.size, clone.size))
+	assert.NotEqualWithMessage(t, original.model, clone.model, fmt.Sprintf("expected different model after modification for %v and %v", original.model, clone.model))
 }
 
 func (b *Bottle[T]) Clone() Bottle[T] {
@@ -62,37 +63,40 @@ type CloneableBottle[T any] = trait.Cloneable[Bottle[T]]
 type CloneableBottleOfWater = trait.Cloneable[Bottle[string]]
 type CloneableBottleOfJuice = trait.Cloneable[Bottle[string]]
 
-func TestClone_Bottle(t *testing.T) {
+// TestBottleClonability verifies that Bottle correctly implements the Cloneable interface
+func TestBottleClonability(t *testing.T) {
 	bottle := NewBottleOfWater()
-
 	var _ CloneableBottleOfWater = &bottle
+	var cloneableBottle trait.Cloneable[Bottle[string]] = &bottle
+	assert.NotNil(t, cloneableBottle)
+}
 
-	var misterybottle trait.Cloneable[Bottle[string]] = &bottle
-	assert.NotNil(t, misterybottle)
+// TestBottleClone tests the cloning functionality for the Bottle type
+func TestBottleClone(t *testing.T) {
+	// Arrange
+	original := NewBottleOfWater()
+	cloneableBottle := trait.Cloneable[Bottle[string]](&original)
 
-	// Clone the bottle
-	clonedBottle := misterybottle.Clone()
+	// Act
+	clone := cloneableBottle.Clone()
 
-	// basic equality
-	assert.EqualWithMessage(t, bottle, clonedBottle, fmt.Sprintf("expected same volume for %v and %v", bottle, clonedBottle))
+	// Assert - Verify content equality
+	assert.EqualWithMessage(t, original, clone, fmt.Sprintf("expected cloned object to have the same content for %v and %v", original, clone))
 
-	// memory address
-	assert.NotEqualWithMessage(t, &bottle, &clonedBottle, fmt.Sprintf("expected different memory address for %v and %v", &bottle, &clonedBottle))
+	// Verify that they are different objects in memory
+	assert.NotEqualWithMessage(t, &original, &clone, fmt.Sprintf("expected different memory addresses for %v and %v", &original, &clone))
 
-	// basic equality inner
-	assert.EqualWithMessage(t, bottle.volume, clonedBottle.volume, fmt.Sprintf("expected same volume for %v and %v", bottle.volume, clonedBottle.volume))
+	// Verify that the fields were copied correctly
+	assert.EqualWithMessage(t, original.volume, clone.volume, fmt.Sprintf("expected same volume for %v and %v", original.volume, clone.volume))
+	assert.EqualWithMessage(t, original.content, clone.content, fmt.Sprintf("expected same content for %v and %v", original.content, clone.content))
 
-	// Change the volume of the cloned bottle
+	// Act - Modify the clone
+	clone.volume = 1000
+	clone.content = "juice"
 
-	clonedBottle.volume = 1000
-	assert.NotEqualWithMessage(t, bottle.volume, clonedBottle.volume, fmt.Sprintf("expected different volume for %v and %v", bottle.volume, clonedBottle.volume))
-	assert.EqualWithMessage(t, bottle.content, clonedBottle.content, fmt.Sprintf("expected same content for %v and %v", bottle.content, clonedBottle.content))
-
-	// Change the content of the cloned bottle
-	clonedBottle.content = "juice"
-
-	assert.NotEqualWithMessage(t, bottle.content, clonedBottle.content, fmt.Sprintf("expected different content for %v and %v", bottle.content, clonedBottle.content))
-
+	// Assert - Verify that the original hasn't changed
+	assert.NotEqualWithMessage(t, original.volume, clone.volume, fmt.Sprintf("expected different volume after modification for %v and %v", original.volume, clone.volume))
+	assert.NotEqualWithMessage(t, original.content, clone.content, fmt.Sprintf("expected different content after modification for %v and %v", original.content, clone.content))
 }
 
 func (b *Box[T]) Clone() Box[T] {
@@ -107,70 +111,86 @@ func (b *Box[T]) Clone() Box[T] {
 type CloneableBox[T any] = trait.Cloneable[Box[T]]
 type CloneableBoxOfWaterBottle = trait.Cloneable[Box[Bottle[string]]]
 type CloneableBoxOfJuiceBottle = trait.Cloneable[Box[Bottle[string]]]
-
 type CloneableBoxOfShoe = trait.Cloneable[Box[Shoe]]
 
-func TestClone_Box(t *testing.T) {
+// TestBoxOfWaterBottleClone tests the cloning functionality for the Box type with Bottle content
+func TestBoxOfWaterBottleClone(t *testing.T) {
+	// Arrange
+	original := NewBoxOfWaterBottle()
+	cloneableBox := trait.Cloneable[Box[Bottle[string]]](&original)
+	assert.NotNil(t, cloneableBox)
 
-	box := NewBoxOfWaterBottle()
+	// Act
+	clone := cloneableBox.Clone()
 
-	var misterybox trait.Cloneable[Box[Bottle[string]]] = &box
-	assert.NotNil(t, misterybox)
+	// Assert - Verify content equality
+	assert.EqualWithMessage(t, original, clone, fmt.Sprintf("expected cloned object to have the same content for %v and %v", original, clone))
 
-	// Clone the box
-	clonedBox := misterybox.Clone()
+	// Verify that they are different objects in memory
+	assert.NotEqualWithMessage(t, &original, &clone, fmt.Sprintf("expected different memory addresses for %v and %v", &original, &clone))
 
-	// basic equality
-	assert.EqualWithMessage(t, box, clonedBox, fmt.Sprintf("expected same volume for %v and %v", box, clonedBox))
+	// Verify that the fields were copied correctly
+	assert.EqualWithMessage(t, original.width, clone.width, fmt.Sprintf("expected same width for %v and %v", original.width, clone.width))
+	assert.EqualWithMessage(t, original.content, clone.content, fmt.Sprintf("expected same content for %v and %v", original.content, clone.content))
 
-	// memory address
-	assert.NotEqualWithMessage(t, &box, &clonedBox, fmt.Sprintf("expected different memory address for %v and %v", &box, &clonedBox))
+	// Act - Modify the clone
+	clone.width = 1000
+	clone.content = NewBottleOfJuice()
 
-	// basic equality inner
-	assert.EqualWithMessage(t, box.width, clonedBox.width, fmt.Sprintf("expected same width for %v and %v", box.width, clonedBox.width))
-
-	// Change the width of the cloned box
-
-	clonedBox.width = 1000
-	assert.NotEqualWithMessage(t, box.width, clonedBox.width, fmt.Sprintf("expected different width for %v and %v", box.width, clonedBox.width))
-	assert.EqualWithMessage(t, box.content, clonedBox.content, fmt.Sprintf("expected same content for %v and %v", box.content, clonedBox.content))
-
-	// Change the content of the cloned box
-	clonedBox.content = NewBottleOfJuice()
-
-	assert.NotEqualWithMessage(t, box.content, clonedBox.content, fmt.Sprintf("expected different content for %v and %v", box.content, clonedBox.content))
-
+	// Assert - Verify that the original hasn't changed
+	assert.NotEqualWithMessage(t, original.width, clone.width, fmt.Sprintf("expected different width after modification for %v and %v", original.width, clone.width))
+	assert.NotEqualWithMessage(t, original.content, clone.content, fmt.Sprintf("expected different content after modification for %v and %v", original.content, clone.content))
 }
 
-func TestClone_BoxOfShoe(t *testing.T) {
+// TestBoxOfShoeClone tests the cloning functionality for the Box type with Shoe content
+func TestBoxOfShoeClone(t *testing.T) {
+	// Arrange
+	original := NewBoxOfShoe()
+	cloneableBox := trait.Cloneable[Box[Shoe]](&original)
+	assert.NotNil(t, cloneableBox)
 
-	box := NewBoxOfShoe()
+	// Act
+	clone := cloneableBox.Clone()
 
-	var misterybox trait.Cloneable[Box[Shoe]] = &box
+	// Assert - Verify content equality
+	assert.EqualWithMessage(t, original, clone, fmt.Sprintf("expected cloned object to have the same content for %v and %v", original, clone))
 
-	assert.NotNil(t, misterybox)
+	// Verify that they are different objects in memory
+	assert.NotEqualWithMessage(t, &original, &clone, fmt.Sprintf("expected different memory addresses for %v and %v", &original, &clone))
 
-	// Clone the box
-	clonedBox := misterybox.Clone()
+	// Verify that the fields were copied correctly
+	assert.EqualWithMessage(t, original.width, clone.width, fmt.Sprintf("expected same width for %v and %v", original.width, clone.width))
+	assert.EqualWithMessage(t, original.content, clone.content, fmt.Sprintf("expected same content for %v and %v", original.content, clone.content))
 
-	// basic equality
-	assert.EqualWithMessage(t, box, clonedBox, fmt.Sprintf("expected same volume for %v and %v", box, clonedBox))
+	// Act - Modify the clone
+	clone.width = 1000
+	clone.content = NewOxfords()
 
-	// memory address
-	assert.NotEqualWithMessage(t, &box, &clonedBox, fmt.Sprintf("expected different memory address for %v and %v", &box, &clonedBox))
+	// Assert - Verify that the original hasn't changed
+	assert.NotEqualWithMessage(t, original.width, clone.width, fmt.Sprintf("expected different width after modification for %v and %v", original.width, clone.width))
+	assert.NotEqualWithMessage(t, original.content, clone.content, fmt.Sprintf("expected different content after modification for %v and %v", original.content, clone.content))
+}
 
-	// basic equality inner
-	assert.EqualWithMessage(t, box.width, clonedBox.width, fmt.Sprintf("expected same width for %v and %v", box.width, clonedBox.width))
+// TestDeepClone verifies that cloning works properly in nested structures
+func TestDeepClone(t *testing.T) {
+	// Arrange
+	original := NewBoxOfWaterBottle()
+	originalBottle := original.content
+	cloneableBox := trait.Cloneable[Box[Bottle[string]]](&original)
 
-	// Change the width of the cloned box
+	// Act
+	clone := cloneableBox.Clone()
 
-	clonedBox.width = 1000
-	assert.NotEqualWithMessage(t, box.width, clonedBox.width, fmt.Sprintf("expected different width for %v and %v", box.width, clonedBox.width))
-	assert.EqualWithMessage(t, box.content, clonedBox.content, fmt.Sprintf("expected same content for %v and %v", box.content, clonedBox.content))
+	// Assert - Verify that the internal content is also a separate object
+	assert.EqualWithMessage(t, original.content, clone.content, fmt.Sprintf("expected clone content to have the same values for %v and %v", original.content, clone.content))
 
-	// Change the content of the cloned box
-	clonedBox.content = NewOxfords()
+	// Modify the content of the clone
+	clone.content.volume = 1500
+	clone.content.content = "sparkling water"
 
-	assert.NotEqualWithMessage(t, box.content, clonedBox.content, fmt.Sprintf("expected different content for %v and %v", box.content, clonedBox.content))
-
+	// Verify that the original content hasn't changed
+	assert.EqualWithMessage(t, originalBottle.volume, original.content.volume, fmt.Sprintf("expected original bottle volume to remain unchanged for %v and %v", originalBottle.volume, original.content.volume))
+	assert.EqualWithMessage(t, originalBottle.content, original.content.content, fmt.Sprintf("expected original bottle content to remain unchanged for %v and %v", originalBottle.content, original.content.content))
+	assert.NotEqualWithMessage(t, original.content.volume, clone.content.volume, fmt.Sprintf("expected different volume in cloned bottle for %v and %v", original.content.volume, clone.content.volume))
+	assert.NotEqualWithMessage(t, original.content.content, clone.content.content, fmt.Sprintf("expected different content in cloned bottle for %v and %v", original.content.content, clone.content.content))
 }
