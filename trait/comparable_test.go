@@ -4,26 +4,26 @@ import (
 	"testing"
 
 	"github.com/fengdotdev/golibs-testing/assert"
-	"github.com/fengdotdev/golibs-traits/exampletypes/comparableexamples"
+	"github.com/fengdotdev/golibs-traits/exampletypes/comparableex"
 	"github.com/fengdotdev/golibs-traits/trait"
 )
 
-type Person = comparableexamples.Person
-type Pet = comparableexamples.Pet
+type Person = comparableex.Person
+type Pet = comparableex.Pet
 type ComparablePerson = trait.Comparable
 type ComparablePet = trait.Comparable
 
 func TestComparable(t *testing.T) {
 
-	var jhon22 ComparablePerson = comparableexamples.NewPerson("John", 22)
+	var jhon22 ComparablePerson = comparableex.NewPerson("John", 22)
 
-	var emily18 ComparablePerson = comparableexamples.NewPerson("Emily", 18)
+	var emily18 ComparablePerson = comparableex.NewPerson("Emily", 18)
 
-	jhonUnknown := comparableexamples.NewPerson("John", 22)
+	jhonUnknown := comparableex.NewPerson("John", 22)
 
-	philip33 := comparableexamples.NewPerson("Philip", 33)
+	philip33 := comparableex.NewPerson("Philip", 33)
 
-	kat60 := comparableexamples.NewPerson("Kat", 60)
+	kat60 := comparableex.NewPerson("Kat", 60)
 
 	t.Run("Person", func(t *testing.T) {
 
@@ -65,12 +65,12 @@ func TestComparable(t *testing.T) {
 	})
 
 	// Pet
-	var scooby ComparablePet = comparableexamples.NewScobbyDoo()
-	var garfield1 ComparablePet = comparableexamples.NewGarfield()
+	var scooby ComparablePet = comparableex.NewScobbyDoo()
+	var garfield1 ComparablePet = comparableex.NewGarfield()
 
-	garfield2 := comparableexamples.NewGarfield()
-	snowball := comparableexamples.NewPet("Snowball", "Cat")
-	lassie := comparableexamples.NewPet("Lassie", "Dog")
+	garfield2 := comparableex.NewGarfield()
+	snowball := comparableex.NewPet("Snowball", "Cat")
+	lassie := comparableex.NewPet("Lassie", "Dog")
 
 	t.Run("Pet", func(t *testing.T) {
 		t.Run("AreEqual", func(t *testing.T) {
@@ -178,9 +178,6 @@ func TestComparable(t *testing.T) {
 		assert.FalseWithMessage(t, scooby.AreEqual(unknown5), "Expected scooby and unknown5 to be not equal")
 		assert.FalseWithMessage(t, scooby.AreEqual(unknown6), "Expected scooby and unknown6 to be not equal")
 		assert.FalseWithMessage(t, scooby.AreEqual(unknown7), "Expected scooby and unknown7 to be not equal")
-
-
-
 
 	})
 

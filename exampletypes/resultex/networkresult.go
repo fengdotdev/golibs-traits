@@ -1,4 +1,4 @@
-package resultexamples
+package resultex
 
 import (
 	"fmt"

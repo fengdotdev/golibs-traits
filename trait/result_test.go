@@ -4,18 +4,18 @@ import (
 	"testing"
 
 	"github.com/fengdotdev/golibs-testing/assert"
-	"github.com/fengdotdev/golibs-traits/exampletypes/resultexamples"
+	"github.com/fengdotdev/golibs-traits/exampletypes/resultex"
 	"github.com/fengdotdev/golibs-traits/trait"
 )
 
 func TestResult_ContentString(t *testing.T) {
 
 	type NetworkResult = trait.Result[string]
-	var _ NetworkResult = &resultexamples.NetworkResult{}
+	var _ NetworkResult = &resultex.NetworkResult{}
 
 	t.Run("Successful Result", func(t *testing.T) {
 
-		var successful NetworkResult = resultexamples.NewValidNetworkResult()
+		var successful NetworkResult = resultex.NewValidNetworkResult()
 
 		assert.EqualWithMessage(t, successful.String(), "NetworkResult: Success", "Expected the content to be 'Success'")
 
@@ -24,7 +24,6 @@ func TestResult_ContentString(t *testing.T) {
 				assert.EqualWithMessage(t, successful.ValueOrPanic(), "Success", "Expected the content to be 'Success'")
 			}, "Expected no panic when accessing the value of a successful result")
 		})
-
 
 		t.Run("Value", func(t *testing.T) {
 			assert.EqualWithMessage(t, successful.Value(), "Success", "Expected the content to be 'Success'")
@@ -58,7 +57,7 @@ func TestResult_ContentString(t *testing.T) {
 	t.Run("Failed Result", func(t *testing.T) {
 
 		// Create a new NetworkResult with an error
-		var failed NetworkResult = resultexamples.NewInvalidNetworkResult()
+		var failed NetworkResult = resultex.NewInvalidNetworkResult()
 
 		assert.EqualWithMessage(t, failed.String(), "NetworkResultError: network error", "Expected the content to be empty")
 
@@ -67,7 +66,6 @@ func TestResult_ContentString(t *testing.T) {
 				failed.ValueOrPanic()
 			}, "Expected panic when accessing the value of a failed result")
 		})
-
 
 		t.Run("Value", func(t *testing.T) {
 			assert.EqualWithMessage(t, failed.Value(), "", "Expected the content to be empty")

@@ -1,4 +1,4 @@
-package makerexamples
+package makerex
 
 import (
 	"github.com/fengdotdev/golibs-traits/exampletypes/handyfuncs"

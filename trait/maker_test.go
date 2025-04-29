@@ -4,16 +4,16 @@ import (
 	"testing"
 
 	"github.com/fengdotdev/golibs-testing/assert"
-	"github.com/fengdotdev/golibs-traits/exampletypes/makerexamples"
+	"github.com/fengdotdev/golibs-traits/exampletypes/makerex"
 )
 
 func TestMaker(t *testing.T) {
 
-	type Shoe = makerexamples.Shoe
-	type Shorts = makerexamples.Shorts
-	type Tshirt = makerexamples.Tshirt
+	type Shoe = makerex.Shoe
+	type Shorts = makerex.Shorts
+	type Tshirt = makerex.Tshirt
 
-	factory := makerexamples.NewFactory(Shoe{}, Shorts{}, Tshirt{})
+	factory := makerex.NewFactory(Shoe{}, Shorts{}, Tshirt{})
 
 	tshirtRaw, err := factory.Makeit("makerexamples.Tshirt")
 	assert.NoError(t, err)

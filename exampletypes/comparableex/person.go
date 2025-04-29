@@ -1,4 +1,4 @@
-package comparableexamples
+package comparableex
 
 import "github.com/fengdotdev/golibs-traits/trait"
 
