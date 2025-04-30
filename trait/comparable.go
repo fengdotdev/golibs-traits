@@ -1,5 +1,7 @@
 package trait
 
+
+// NOT READY FOR PRODUCTION
 type Comparable interface {
 
 	// AreEqual checks if the current instance is equal to another instance of the same type.

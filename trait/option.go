@@ -1,6 +1,6 @@
 package trait
 
-
+// NOT READY FOR PRODUCTION
 type Option[T any] interface {
 	IsSome() bool // IsSome returns true if the Option is Some
 	IsNone() bool // IsNone returns true if the Option is None

@@ -1,10 +1,12 @@
 package trait
 
+// NOT READY FOR PRODUCTION
 type Validable[SELF any] interface {
 	IsValid() bool
 	IsInvalid() bool
 }
 
+// NOT READY FOR PRODUCTION
 type ValidableDeep[SELF any] interface {
 	Validable[SELF]
 

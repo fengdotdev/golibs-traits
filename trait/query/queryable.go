@@ -1,5 +1,6 @@
 package query
 
+// NOT READY FOR PRODUCTION
 type Queryable[Result any] interface {
 	FinderByID[Result]
 	Finder[Result]
@@ -8,6 +9,7 @@ type Queryable[Result any] interface {
 	FinderByID[Result]
 }
 
+// NOT READY FOR PRODUCTION
 type QueryableWithCTX[Result any] interface {
 	FinderByIDWithCTX[Result]
 	FinderWithCTX[Result]
