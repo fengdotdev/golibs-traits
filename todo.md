@@ -9,4 +9,4 @@
 [   ] Maker
 [   ] Binarer
 [   ] Typeable
-[   ] TypeStringer
+[ x ] TypeStringer

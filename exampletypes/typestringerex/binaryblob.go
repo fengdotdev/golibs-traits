@@ -12,12 +12,16 @@ type BinaryBlob struct {
 	content []byte
 }
 
+
+// NewBinaryBlob creates a new BinaryBlob from a byte slice
 func NewBinaryBlob(content []byte) *BinaryBlob {
 	return &BinaryBlob{
 		content: content,
 	}
 }
 
+
+// NewBinaryBlobFromString creates a new BinaryBlob from a base64 encoded string
 func NewBinaryBlobFromString(content string) (*BinaryBlob, error) {
 	// decode from base64
 	decodedContent, err := base64.StdEncoding.DecodeString(content)
@@ -33,15 +37,20 @@ func NewBinaryBlobFromString(content string) (*BinaryBlob, error) {
 
 }
 
+// Content returns the content of the BinaryBlob as a byte slice
 func (b *BinaryBlob) Content() []byte {
 	return b.content
 }
+
+// SetContent sets the content of the BinaryBlob
+// to the given byte slice
 func (b *BinaryBlob) SetContent(content []byte) {
 	b.content = content
 }
 
 // TypeName implements trait.TypeStringer.
-
+// return the name of the type
+// in this case, it is "binaryblob"
 func (b *BinaryBlob) TypeName() string {
 	return "binaryblob"
 }
