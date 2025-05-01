@@ -10,3 +10,5 @@
 [   ] Binarer
 [   ] Typeable
 [ x ] TypeStringer
+[  ] Validable 
+[   ] ValidableDeep
