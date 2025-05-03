@@ -22,8 +22,6 @@ var (
 	// From Canada, USA, Mexico, Peru and Chile Only
 	ValidCountryCodes = CountryCodes{
 		"+1":  "Canada/USA",
-		"+52": "Mexico",
-		"+51": "Peru",
 		"+56": "Chile",
 	}
 )

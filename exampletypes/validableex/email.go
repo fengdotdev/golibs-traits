@@ -5,9 +5,9 @@ import "github.com/fengdotdev/golibs-traits/trait"
 var _ trait.Validable = &Email{}
 
 type Email struct {
-	email string
+	email   string
 	isValid bool
-	reason error
+	reason  error
 }
 
 //constructors
@@ -15,13 +15,11 @@ type Email struct {
 // by default, the email is not validated
 func NewEmail(email string) *Email {
 	return &Email{
-		email: email,
+		email:   email,
 		isValid: false,
-		reason: ErrorEmailNotValidatedYet,
-
+		reason:  ErrorEmailNotValidatedYet,
 	}
 }
-
 
 // retuns a new email with the validation
 func NewValidatedEmail(email string) *Email {
@@ -48,7 +46,6 @@ func (e *Email) Reason() error {
 	return e.reason
 }
 
-
 func (e *Email) Validate() {
 	if e.isValid && e.reason == nil {
 		return
@@ -59,3 +56,10 @@ func (e *Email) Validate() {
 	e.reason = err
 }
 
+func (e *Email) String() string {
+	return e.email
+}
+
+func (e *Email) Value() string {
+	return e.email
+}

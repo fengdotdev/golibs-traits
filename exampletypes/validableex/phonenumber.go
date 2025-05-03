@@ -28,7 +28,6 @@ func NewValidatedPhoneNumber(number string) *PhoneNumber {
 	return p
 }
 
-
 func (p *PhoneNumber) Validate() {
 	if p.isValid && p.reason == nil {
 		return
@@ -50,9 +49,17 @@ func (p *PhoneNumber) IsValid() bool {
 }
 
 func (p *PhoneNumber) Reason() error {
-		// protect against zero values
-	if p.reason == nil  && !p.isValid {
+	// protect against zero values
+	if p.reason == nil && !p.isValid {
 		return ErrorPhoneNotValidatedYet
 	}
 	return p.reason
+}
+
+func (p *PhoneNumber) String() string {
+	return p.number
+}
+
+func (p *PhoneNumber) Value() string {
+	return p.number
 }

@@ -19,23 +19,24 @@ func TestValidable(t *testing.T) {
 		var _ ValidablePhoneNumber = &validableex.PhoneNumber{}
 
 		rawNumber := "+56 9 1234 5678"
-		p := validableex.NewPhoneNumber(rawNumber)
+		p := validableex.NewPhoneNumber(rawNumber) //by default, it is invalid
 
 		t.Run("Interface", func(t *testing.T) {
 			assert.TypeWithMessage(t, p, ValidablePhoneNumber(nil), "PhoneNumber should implement Validable[any]")
 		})
 
 		t.Run("Validable getters", func(t *testing.T) {
-			assert.EqualWithMessage(t, false, p.IsValid(), "PhoneNumber should not be valid")
-			assert.EqualWithMessage(t, true, p.IsInvalid(), "PhoneNumber should be invalid")
-			assert.EqualWithMessage(t, rawNumber, p.Reason().Error(), "PhoneNumber should have a reason")
+			assert.FalseWithMessage(t, p.IsValid(), "PhoneNumber should not be valid")
+			assert.TrueWithMessage(t, p.IsInvalid(), "PhoneNumber should be invalid")
+			assert.ErrorWithMessage(t, p.Reason(), "PhoneNumber should have a reason")
 		})
 
 		t.Run("Validable setters", func(t *testing.T) {
 			p.Validate()
-			assert.EqualWithMessage(t, true, p.IsValid(), "PhoneNumber should be valid")
-			assert.EqualWithMessage(t, false, p.IsInvalid(), "PhoneNumber should not be invalid")
-			assert.EqualWithMessage(t, nil, p.Reason(), "PhoneNumber should have no reason")
+			assert.TrueWithMessage(t, p.IsValid(), "PhoneNumber should be valid")
+			assert.FalseWithMessage(t, p.IsInvalid(), "PhoneNumber should not be invalid")
+			assert.NoErrorWithMessage(t, p.Reason(), "PhoneNumber should not have a reason")
+			assert.EqualWithMessage(t, p.String(), rawNumber, "PhoneNumber should be equal to the raw number")
 		})
 
 	})
