@@ -23,7 +23,9 @@ func EmailValidator(email string) (bool, error) {
 	if IsEmailEmpty(email) {
 		return false, ErrorEmailEmpty
 	}
-
+	if EmailHaveSpaces(email) {
+		return false, ErrorEmailContainEspaces
+	}
 	// a@c.c  4
 	// 4 - 254
 	if !IsEmailInRange(email, 4, 254) {
@@ -34,22 +36,24 @@ func EmailValidator(email string) (bool, error) {
 		return false, ErrorEmailInvalidCharacters
 	}
 
-	if EmailContainArrobas(email) {
+	if !EmailContainArrobas(email) {
 		return false, ErrorEmailInvalidFormat
 	}
 
-	if EmailContainDomain(email) {
+	if !EmailContainDomain(email) {
 		return false, ErrorEmailNotDomain
 	}
-	// other validations
 
-	// Use Go's built-in email parsing for more robust validation
-	_, err := mail.ParseAddress(email)
-	if err != nil {
+	if !EmailIsValidByGo(email) {
 		return false, ErrorEmailInvalid
 	}
 
 	return true, nil
+}
+
+func EmailIsValidByGo(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }
 
 // IsEmailInRange checks if the email length is within the specified range
@@ -87,15 +91,13 @@ func EmailContainDomain(email string) bool {
 	// This is a basic check; more sophisticated domain validation might be needed
 	return strings.Contains(domain, ".")
 }
-
+// EmailHaveSpaces checks if the email contains spaces
 func EmailHaveSpaces(email string) bool {
-	// Check if the email contains spaces
 	return strings.Contains(email, " ")
 }
 
 // this regex is used to check for forbidden characters in the email
 const regexForbiddenEmailChars = "[\\s\\t\\n\\r,;:\\\\\\/()\\[\\]{}<>|`^*!#$%&=?~]"
-
 
 // EmailHaveForbiddenChars checks if the email contains forbidden characters
 // allowed characters are: a-zA-Z0-9._%+-@
@@ -106,4 +108,3 @@ func EmailHaveForbiddenChars(email string) bool {
 	forbidden := regexp.MustCompile(regexForbiddenEmailChars)
 	return forbidden.MatchString(email)
 }
-
