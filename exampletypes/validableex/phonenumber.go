@@ -4,7 +4,7 @@ import (
 	"github.com/fengdotdev/golibs-traits/trait"
 )
 
-var _ trait.Validable = &PhoneNumber{}
+var _ trait.Validable[string] = &PhoneNumber{}
 
 type PhoneNumber struct {
 	number  string

@@ -8,57 +8,76 @@ import (
 )
 
 var (
-	ErrorEmailNotValidatedYet = errors.New("not validated yet")
-	ErrorInvalidEmail         = errors.New("invalid email")
-	ErrorEmptyEmail           = errors.New("empty email")
-	ErrorLengthEmail          = errors.New("email length is invalid") // 5 - 254
+	ErrorEmailNotValidatedYet   = errors.New("not validated yet")
+	ErrorEmailInvalid           = errors.New("invalid email")
+	ErrorEmailInvalidCharacters = errors.New("invalid characters in email")
+	ErrorEmailInvalidFormat     = errors.New("invalid email format")
+	ErrorEmailEmpty             = errors.New("empty email")
+	ErrorEmailNotDomain         = errors.New("email domain is invalid")
+	ErrorLengthEmail            = errors.New("email length is invalid") // 5 - 254
+	ErrorEmailContainEspaces    = errors.New("email contains spaces")
 )
 
 func EmailValidator(email string) (bool, error) {
 
 	if IsEmailEmpty(email) {
-		return false, ErrorEmptyEmail
+		return false, ErrorEmailEmpty
 	}
 
-	if IsEmailInRange(email, 5, 254) {
+	// a@c.c  4
+	// 4 - 254
+	if !IsEmailInRange(email, 4, 254) {
 		return false, ErrorLengthEmail
 	}
 
 	if EmailHaveForbiddenChars(email) {
-		return false, ErrorInvalidEmail
+		return false, ErrorEmailInvalidCharacters
 	}
 
 	if EmailContainArrobas(email) {
-		return false, ErrorInvalidEmail
+		return false, ErrorEmailInvalidFormat
 	}
 
 	if EmailContainDomain(email) {
-		return false, ErrorInvalidEmail
+		return false, ErrorEmailNotDomain
 	}
 	// other validations
 
 	// Use Go's built-in email parsing for more robust validation
 	_, err := mail.ParseAddress(email)
 	if err != nil {
-		return false, ErrorInvalidEmail
+		return false, ErrorEmailInvalid
 	}
 
 	return true, nil
 }
 
+// IsEmailInRange checks if the email length is within the specified range
+// lower < x < upper -> true
 func IsEmailInRange(email string, lower int, upper int) bool {
 	emailLength := len(email)
-	return emailLength >= lower && emailLength <= upper
+
+	if emailLength < lower {
+		return true
+	}
+	if emailLength > upper {
+		return false
+	}
+	return true
 }
 
+// IsEmailEmpty checks if the email is empty or contains only whitespace
 func IsEmailEmpty(email string) bool {
 	return strings.TrimSpace(email) == ""
 }
 
+// EmailContainArrobas checks if the email contains exactly one '@' symbol
 func EmailContainArrobas(email string) bool {
 	return strings.Count(email, "@") == 1
 }
 
+// EmailContainDomain checks if the email contains a domain part after the '@' symbol
+// and that the domain is valid (contains at least one dot)
 func EmailContainDomain(email string) bool {
 	parts := strings.Split(email, "@")
 	if len(parts) != 2 || parts[1] == "" {
@@ -69,9 +88,22 @@ func EmailContainDomain(email string) bool {
 	return strings.Contains(domain, ".")
 }
 
+func EmailHaveSpaces(email string) bool {
+	// Check if the email contains spaces
+	return strings.Contains(email, " ")
+}
+
+// this regex is used to check for forbidden characters in the email
+const regexForbiddenEmailChars = "[\\s\\t\\n\\r,;:\\\\\\/()\\[\\]{}<>|`^*!#$%&=?~]"
+
+
+// EmailHaveForbiddenChars checks if the email contains forbidden characters
+// allowed characters are: a-zA-Z0-9._%+-@
+// not allowed characters are: <>()[]\,";:'`!#$%^&*|/{}~`
 func EmailHaveForbiddenChars(email string) bool {
 	// Regular expression to match characters that are generally not allowed
 	// in email addresses (excluding those handled by mail.ParseAddress)
-	forbidden := regexp.MustCompile(`[\s<>()\[\]\\,;:"']`)
+	forbidden := regexp.MustCompile(regexForbiddenEmailChars)
 	return forbidden.MatchString(email)
 }
+

@@ -13,7 +13,7 @@ var (
 		"otro.usuario123@subdominio.ejemplo.cl",
 		"mi_correo+etiqueta@proveedor.net",
 		"primera.letra@dominio-con-guion.info",
-		"a@b.co",
+		"a@b.c",
 	}
 
 	invalidEmails = []struct {

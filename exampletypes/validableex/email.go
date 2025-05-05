@@ -2,7 +2,7 @@ package validableex
 
 import "github.com/fengdotdev/golibs-traits/trait"
 
-var _ trait.Validable = &Email{}
+var _ trait.Validable[string] = &Email{}
 
 type Email struct {
 	email   string
@@ -47,6 +47,7 @@ func (e *Email) Reason() error {
 }
 
 func (e *Email) Validate() {
+	// check if the email is already validated
 	if e.isValid && e.reason == nil {
 		return
 	}
