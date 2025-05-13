@@ -15,6 +15,10 @@ type CRUD[K Indexable, V any] interface {
 	Keys() []K
 	Values() []V
 	All() map[K]V
+	Iterate(func(K, V) error)
+	Clean()
+	Populate(map[K]V)
+
 }
 
 type CRUDWithCTX[K Indexable, V any] interface {

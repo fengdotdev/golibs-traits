@@ -7,7 +7,7 @@ import (
 	"github.com/fengdotdev/golibs-traits/exampletypes/crudex"
 )
 
-func TestMap(t *testing.T) {
+func TestMap_StringString(t *testing.T) {
 
 	t.Run("new", func(t *testing.T) {
 		m := crudex.NewMap[string, string]()
@@ -20,6 +20,12 @@ func TestMap(t *testing.T) {
 		result, err := m.Exists("1")
 		assert.False(t, result)
 		assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrNotFound.Error(), err.Error())
+
+		err = m.Create("1", "item1")
+		assert.NoError(t, err)
+		result2, err2 := m.Exists("1")
+		assert.True(t, result2)
+		assert.NoError(t, err2)
 	})
 
 	t.Run("Create", func(t *testing.T) {
@@ -154,7 +160,6 @@ func TestMap(t *testing.T) {
 		assert.Equal(t, 2, len(keys))
 	})
 
-
 	t.Run("Values", func(t *testing.T) {
 		m := crudex.NewMap[string, string]()
 
@@ -167,7 +172,6 @@ func TestMap(t *testing.T) {
 		values := m.Values()
 		assert.Equal(t, 2, len(values))
 	})
-
 
 	t.Run("All", func(t *testing.T) {
 		m := crudex.NewMap[string, string]()
@@ -182,21 +186,87 @@ func TestMap(t *testing.T) {
 		assert.Equal(t, 2, len(all))
 	})
 
-	t.Run("Count", func(t *testing.T) {
+	t.Run("All empty", func(t *testing.T) {
 		m := crudex.NewMap[string, string]()
 
-		err := m.Create("1", "item1")
-		assert.NoError(t, err)
-
-		err = m.Create("2", "item2")
-		assert.NoError(t, err)
-
-		count, err := m.Count("item")
-		assert.NoError(t, err)
-		assert.Equal(t, 2, count)
+		all := m.All()
+		assert.Equal(t, 0, len(all))
 	})
 
-	t.Run("Count InvalidTerm", func(t *testing.T) {
+	t.Run("All with nil", func(t *testing.T) {
+		m := crudex.NewMap[string, any]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Create("2", nil)
+		assert.NoError(t, err)
+
+		all := m.All()
+		assert.Equal(t, 2, len(all))
+	})
+
+	t.Run("iterate read", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+		err = m.Create("3", "item3")
+		assert.NoError(t, err)
+		err = m.Create("4", "item4")
+		assert.NoError(t, err)
+		err = m.Create("5", "item5")
+		assert.NoError(t, err)
+		err = m.Create("6", "item6")
+		assert.NoError(t, err)
+
+		listKeys := make([]string, 0)
+
+		listValues := make([]string, 0)
+
+		m.Iterate(func(k string, v string) error {
+			listKeys = append(listKeys, k)
+			listValues = append(listValues, v)
+			return nil
+		})
+
+		assert.Equal(t, 6, len(listKeys))
+		assert.Equal(t, 6, len(listValues))
+	})
+
+	t.Run("iterate read with error", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+		err = m.Create("3", "item3")
+		assert.NoError(t, err)
+		err = m.Create("4", "item4")
+		assert.NoError(t, err)
+		err = m.Create("5", "item5")
+		assert.NoError(t, err)
+		err = m.Create("6", "item6")
+		assert.NoError(t, err)
+
+		listKeys := make([]string, 0)
+		listValues := make([]string, 0)
+		err = m.Iterate(func(k string, v string)error  {
+			listKeys = append(listKeys, k)
+			listValues = append(listValues, v)
+			if k == "3" {
+				return crudex.ErrNotFound
+			}
+			return nil
+		})
+
+		assert.Equal(t, 3, len(listKeys))
+		assert.Equal(t, 3, len(listValues))
+		assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrNotFound.Error(), err.Error())
+	})
+
+	t.Run("clean", func(t *testing.T) {
 		m := crudex.NewMap[string, string]()
 
 		err := m.Create("1", "item1")
@@ -205,8 +275,20 @@ func TestMap(t *testing.T) {
 		err = m.Create("2", "item2")
 		assert.NoError(t, err)
 
-		count, err := m.Count("")
-		assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrInvalidTerm.Error(), err.Error())
-		assert.Equal(t, 0, count)
+		m.Clean()
+		assert.Equal(t, 0, m.Len())
+	})
+
+	t.Run("Populate", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+
+		m.Populate(map[string]string{"3": "item3", "4": "item4"})
+		assert.Equal(t, 4, m.Len())
 	})
 }

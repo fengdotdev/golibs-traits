@@ -2,8 +2,8 @@ package crudex
 
 import (
 	"errors"
+	"sync"
 
-	"github.com/fengdotdev/golibs-traits/exampletypes/handyfuncs"
 	"github.com/fengdotdev/golibs-traits/trait"
 )
 
@@ -21,65 +21,40 @@ var (
 
 var _ trait.CRUD[string, any] = &Map[string, any]{}
 
-type Indexable interface {
-	~int | ~string | ~float64
-}
-
 type Map[K Indexable, V any] struct {
-	container   map[K]V
-	haveSubtype bool
-	subtype     string
+	container map[K]V
+	mu        sync.RWMutex
 }
 
 //constructor
 
 func NewMap[K Indexable, V any]() *Map[K, V] {
 
-	subtype := ""
-
-	// check if v is a map or slice
-
-	if _, ok := any(new(V)).(map[K]V); ok {
-		subtype = "map"
-	}
-	if _, ok := any(new(V)).([]V); ok {
-		subtype = "slice"
-	}
-
 	return &Map[K, V]{
 		container: make(map[K]V),
-		haveSubtype: (subtype != ""),
-		subtype:     subtype,
+		mu:        sync.RWMutex{},
 	}
 }
 
 // All implements trait.CRUD.
 func (m *Map[K, V]) All() map[K]V {
-	return m.container
-}
 
-// Count implements trait.CRUD.
-func (m *Map[K, V]) Count(term string) (int, error) {
-	if term == "" {
-		return 0, ErrInvalidTerm
+	// todo check this may is a better implementation
+
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	copyMap := make(map[K]V, len(m.container))
+	for key, value := range m.container {
+		copyMap[key] = value
 	}
-
-	count := 0
-	for _, item := range m.container {
-
-		switch v := any(item).(type) {
-		case string:
-			if handyfuncs.LookupStringIn(term, v) {
-				count++
-			}
-		default:
-		}
-	}
-	return count, nil
+	return copyMap
 }
 
 // Create implements trait.CRUD.
 func (m *Map[K, V]) Create(id K, item V) error {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 
 	if _, exists := m.container[id]; exists {
 		return ErrAlreadyExists
@@ -91,6 +66,9 @@ func (m *Map[K, V]) Create(id K, item V) error {
 
 // Delete implements trait.CRUD.
 func (m *Map[K, V]) Delete(id K) error {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
 	if _, exists := m.container[id]; !exists {
 		return ErrNotFound
 	}
@@ -101,12 +79,20 @@ func (m *Map[K, V]) Delete(id K) error {
 // Exists implements trait.CRUD.
 func (m *Map[K, V]) Exists(id K) (bool, error) {
 
-	_, exists := m.container[id]
-	return exists, nil
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	if _, exists := m.container[id]; !exists {
+		return false, ErrNotFound
+	}
+	return true, nil
 }
 
 // Keys implements trait.CRUD.
 func (m *Map[K, V]) Keys() []K {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
 	keys := make([]K, 0, len(m.container))
 	for k := range m.container {
 		keys = append(keys, k)
@@ -116,11 +102,16 @@ func (m *Map[K, V]) Keys() []K {
 
 // Len implements trait.CRUD.
 func (m *Map[K, V]) Len() int {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
 	return len(m.container)
 }
 
 // Read implements trait.CRUD.
 func (m *Map[K, V]) Read(id K) (V, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 
 	var zero V
 	if _, exists := m.container[id]; !exists {
@@ -129,104 +120,11 @@ func (m *Map[K, V]) Read(id K) (V, error) {
 	return m.container[id], nil
 }
 
-// Search implements trait.CRUD.
-// this function is not supported for this map implementation
-// use SearchAll instead
-func (m *Map[K, V]) Search(term string, where func(item V) bool, from ...string) ([]V, error) {
-	// no term branch ( wh)
-	if term == "" {
-
-		if where == nil {
-			return nil, ErrInvalidWhere
-		}
-		return m.searchNoTerm(where, from...)
-	}
-	return m.searchTerm(term, where, from...)
-}
-
-
-
-
-
-
-func (m *Map[K, V]) 
-
-
-
-
-func (m *Map[K, V]) searchTerm(term string, where func(item V) bool, from ...string) ([]V, error) {
-
-	result := make([]V, 0)
-
-	// no subtype 
-	if from == nil {
-		for _, item := range m.container {
-
-
-
-
-			if where != nil {
-				condition := where(item)
-
-				if condition {
-					result = append(result, item)
-				}
-
-			}
-
-			
-		}
-		return result, nil
-
-	}
-
-
-
-
-	return result, nil
-}
-
-func (m *Map[K, V]) searchNoTerm(where func(item V) bool, from ...string) ([]V, error) {
-
-	result := make([]V, 0)
-
-	for _, item := range m.container {
-
-
-		
-		condition := where(item)
-
-		if condition {
-			result = append(result, item)
-		}
-	}
-
-	return result, nil
-}
-
-// SearchAll implements trait.CRUD.
-// SearchAll searches for all items that match the term in the specified field
-func (m *Map[K, V]) SearchAll(term string) ([]V, error) {
-	if term == "" {
-		return nil, ErrInvalidTerm
-	}
-
-	results := make([]V, 0)
-	for _, item := range m.container {
-
-		switch v := any(item).(type) {
-		case string:
-			if handyfuncs.LookupStringIn(term, v) {
-				results = append(results, item)
-			}
-		default:
-		}
-	}
-	return results, nil
-}
-
 // Update implements trait.CRUD.
 func (m *Map[K, V]) Update(id K, item V) error {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
 	if _, exists := m.container[id]; !exists {
 		return ErrNotFound
 	}
@@ -236,9 +134,48 @@ func (m *Map[K, V]) Update(id K, item V) error {
 
 // Values implements trait.CRUD.
 func (m *Map[K, V]) Values() []V {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
 	values := make([]V, 0, len(m.container))
 	for _, v := range m.container {
 		values = append(values, v)
 	}
 	return values
+}
+
+// Iterate implements trait.CRUD.
+// Iterate iterates over the map and applies the provided function to each key-value pair.
+// If the function returns an error, the iteration stops.
+func (m *Map[K, V]) Iterate(fn func(K, V) error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	for k, v := range m.container {
+		if err := fn(k, v); err != nil {
+			return
+		}
+	}
+}
+
+// Clean implements trait.CRUD.
+// Clean clears the map.
+func (m *Map[K, V]) Clean() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.container = make(map[K]V)
+}
+
+// Populate populates the map with the provided items.
+// It locks the map for writing, so it should be used with caution in concurrent environments.
+// this overrides the current map content and may replace some items
+func (m *Map[K, V]) Populate(items map[K]V) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for k, v := range items {
+		// ignore map.copy dont use it
+		m.container[k] = v
+	}
 }
