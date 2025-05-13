@@ -61,4 +61,152 @@ func TestMap(t *testing.T) {
 		//err = m.Create(1, "item2")
 		//assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrInvalidID.Error(), err.Error())
 	})
+
+	t.Run("Read", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		item, err := m.Read("1")
+		assert.NoError(t, err)
+		assert.Equal(t, "item1", item)
+	})
+
+	t.Run("Read NotFound", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		item, err := m.Read("1")
+		assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrNotFound.Error(), err.Error())
+		assert.Equal(t, "", item)
+	})
+
+	t.Run("Read InvalidID", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+		assert.NotNil(t, m)
+		//err := m.Read(nil)
+		//assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrInvalidID.Error(), err.Error())
+	})
+
+	t.Run("Update", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Update("1", "item2")
+		assert.NoError(t, err)
+
+		item, err := m.Read("1")
+		assert.NoError(t, err)
+		assert.Equal(t, "item2", item)
+	})
+
+	t.Run("Update NotFound", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Update("1", "item2")
+		assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrNotFound.Error(), err.Error())
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Delete("1")
+		assert.NoError(t, err)
+
+		result, err := m.Exists("1")
+		assert.False(t, result)
+		assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrNotFound.Error(), err.Error())
+	})
+	t.Run("Delete NotFound", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Delete("1")
+		assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrNotFound.Error(), err.Error())
+	})
+
+	t.Run("Len", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+
+		assert.Equal(t, 2, m.Len())
+	})
+
+	t.Run("Keys", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+
+		keys := m.Keys()
+		assert.Equal(t, 2, len(keys))
+	})
+
+
+	t.Run("Values", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+
+		values := m.Values()
+		assert.Equal(t, 2, len(values))
+	})
+
+
+	t.Run("All", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+
+		all := m.All()
+		assert.Equal(t, 2, len(all))
+	})
+
+	t.Run("Count", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+
+		count, err := m.Count("item")
+		assert.NoError(t, err)
+		assert.Equal(t, 2, count)
+	})
+
+	t.Run("Count InvalidTerm", func(t *testing.T) {
+		m := crudex.NewMap[string, string]()
+
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+
+		count, err := m.Count("")
+		assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrInvalidTerm.Error(), err.Error())
+		assert.Equal(t, 0, count)
+	})
 }

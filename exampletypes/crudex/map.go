@@ -21,9 +21,8 @@ var (
 
 var _ trait.CRUD[string, any] = &Map[string, any]{}
 
-
 type Indexable interface {
-    ~int | ~string | ~float64 
+	~int | ~string | ~float64
 }
 
 type Map[K Indexable, V any] struct {
@@ -31,9 +30,6 @@ type Map[K Indexable, V any] struct {
 }
 
 //constructor
-
-
-
 
 func NewMap[K Indexable, V any]() *Map[K, V] {
 
@@ -121,8 +117,43 @@ func (m *Map[K, V]) Read(id K) (V, error) {
 // Search implements trait.CRUD.
 // this function is not supported for this map implementation
 // use SearchAll instead
-func (m *Map[K, V]) Search(term string, where string) ([]V, error) {
-	return nil, errors.ErrUnsupported
+func (m *Map[K, V]) Search(term string, where func(item V) bool, from ...string) ([]V, error) {
+
+	if term == "" {
+		return nil, ErrInvalidTerm
+	}
+	if where == nil {
+		return nil, ErrInvalidWhere
+	}
+
+	isFrom := len(from) > 0
+
+	fromField := ""
+	if isFrom {
+		fromField = from[0]
+	}
+
+	results := make([]V, 0)
+	for _, item := range m.container {
+		switch v := any(item).(type) {
+		case string:
+			if handyfuncs.LookupStringIn(term, v) {
+			
+				
+			}
+
+		case map[string]any:
+
+			pa
+
+
+			
+		default:
+
+		}
+
+	return results, nil
+	
 }
 
 // SearchAll implements trait.CRUD.

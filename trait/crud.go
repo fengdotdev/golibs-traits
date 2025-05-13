@@ -3,7 +3,7 @@ package trait
 import "context"
 
 type Indexable interface {
-    ~int | ~string | ~float64 
+	~int | ~string | ~float64
 }
 
 type CRUD[K Indexable, V any] interface {
@@ -17,7 +17,7 @@ type CRUD[K Indexable, V any] interface {
 	Values() []V
 	All() map[K]V
 	Count(term string) (int, error)
-	Search(term string, where string) ([]V, error)
+	Search(term string, where func(item V) bool, from ...string) ([]V, error)
 	SearchAll(term string) ([]V, error)
 }
 type CRUDWithCTX[K Indexable, V any] interface {
@@ -31,6 +31,6 @@ type CRUDWithCTX[K Indexable, V any] interface {
 	Values(ctx context.Context) []V
 	All(ctx context.Context) map[K]V
 	Count(ctx context.Context, term string) (int, error)
-	Search(ctx context.Context, term string, where string) ([]V, error)
+	Search(ctx context.Context, term string, where func(item V) bool, from ...string) ([]V, error)
 	SearchAll(ctx context.Context, term string) ([]V, error)
 }
