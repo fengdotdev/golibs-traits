@@ -2,8 +2,8 @@ package crudex
 
 import (
 	"errors"
-	"strings"
 
+	"github.com/fengdotdev/golibs-traits/exampletypes/handyfuncs"
 	"github.com/fengdotdev/golibs-traits/trait"
 )
 
@@ -21,18 +21,26 @@ var (
 
 var _ trait.CRUD[string, any] = &Map[string, any]{}
 
-type Map[K comparable, V any] struct {
+
+type Indexable interface {
+    ~int | ~string | ~float64 
+}
+
+type Map[K Indexable, V any] struct {
 	container map[K]V
 }
 
 //constructor
 
-func NewMap[K comparable, V any]() *Map[K, V] {
+
+
+
+func NewMap[K Indexable, V any]() *Map[K, V] {
+
 	return &Map[K, V]{
 		container: make(map[K]V),
 	}
 }
-
 
 // All implements trait.CRUD.
 func (m *Map[K, V]) All() map[K]V {
@@ -50,7 +58,7 @@ func (m *Map[K, V]) Count(term string) (int, error) {
 
 		switch v := any(item).(type) {
 		case string:
-			if LookupStringIn(term, v) {
+			if handyfuncs.LookupStringIn(term, v) {
 				count++
 			}
 		default:
@@ -129,7 +137,7 @@ func (m *Map[K, V]) SearchAll(term string) ([]V, error) {
 
 		switch v := any(item).(type) {
 		case string:
-			if LookupStringIn(term, v) {
+			if handyfuncs.LookupStringIn(term, v) {
 				results = append(results, item)
 			}
 		default:
@@ -154,18 +162,4 @@ func (m *Map[K, V]) Values() []V {
 		values = append(values, v)
 	}
 	return values
-}
-
-
-
-// LookupStringIn checks if a string is present in another string
-// It returns true if the term is found in the whole string, otherwise false
-// It is case insensitive
-func LookupStringIn(term string, whole string) bool {
-	if term == "" || whole == "" {
-		return true
-	}
-
-	result := strings.Contains(strings.ToLower(whole), strings.ToLower(term))
-	return result
 }

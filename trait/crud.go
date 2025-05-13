@@ -2,7 +2,11 @@ package trait
 
 import "context"
 
-type CRUD[K comparable, V any] interface {
+type Indexable interface {
+    ~int | ~string | ~float64 
+}
+
+type CRUD[K Indexable, V any] interface {
 	Create(id K, item V) error
 	Read(id K) (V, error)
 	Update(id K, item V) error
@@ -16,7 +20,7 @@ type CRUD[K comparable, V any] interface {
 	Search(term string, where string) ([]V, error)
 	SearchAll(term string) ([]V, error)
 }
-type CRUDWithCTX[K comparable, V any] interface {
+type CRUDWithCTX[K Indexable, V any] interface {
 	Create(ctx context.Context, id K, item V) error
 	Read(ctx context.Context, id K) (V, error)
 	Update(ctx context.Context, id K, item V) error
