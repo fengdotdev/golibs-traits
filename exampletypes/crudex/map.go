@@ -26,15 +26,30 @@ type Indexable interface {
 }
 
 type Map[K Indexable, V any] struct {
-	container map[K]V
+	container   map[K]V
+	haveSubtype bool
+	subtype     string
 }
 
 //constructor
 
 func NewMap[K Indexable, V any]() *Map[K, V] {
 
+	subtype := ""
+
+	// check if v is a map or slice
+
+	if _, ok := any(new(V)).(map[K]V); ok {
+		subtype = "map"
+	}
+	if _, ok := any(new(V)).([]V); ok {
+		subtype = "slice"
+	}
+
 	return &Map[K, V]{
 		container: make(map[K]V),
+		haveSubtype: (subtype != ""),
+		subtype:     subtype,
 	}
 }
 
@@ -118,42 +133,75 @@ func (m *Map[K, V]) Read(id K) (V, error) {
 // this function is not supported for this map implementation
 // use SearchAll instead
 func (m *Map[K, V]) Search(term string, where func(item V) bool, from ...string) ([]V, error) {
-
+	// no term branch ( wh)
 	if term == "" {
-		return nil, ErrInvalidTerm
-	}
-	if where == nil {
-		return nil, ErrInvalidWhere
-	}
 
-	isFrom := len(from) > 0
-
-	fromField := ""
-	if isFrom {
-		fromField = from[0]
+		if where == nil {
+			return nil, ErrInvalidWhere
+		}
+		return m.searchNoTerm(where, from...)
 	}
+	return m.searchTerm(term, where, from...)
+}
 
-	results := make([]V, 0)
-	for _, item := range m.container {
-		switch v := any(item).(type) {
-		case string:
-			if handyfuncs.LookupStringIn(term, v) {
-			
-				
+
+
+
+
+
+func (m *Map[K, V]) 
+
+
+
+
+func (m *Map[K, V]) searchTerm(term string, where func(item V) bool, from ...string) ([]V, error) {
+
+	result := make([]V, 0)
+
+	// no subtype 
+	if from == nil {
+		for _, item := range m.container {
+
+
+
+
+			if where != nil {
+				condition := where(item)
+
+				if condition {
+					result = append(result, item)
+				}
+
 			}
 
-		case map[string]any:
-
-			pa
-
-
 			
-		default:
-
 		}
+		return result, nil
 
-	return results, nil
-	
+	}
+
+
+
+
+	return result, nil
+}
+
+func (m *Map[K, V]) searchNoTerm(where func(item V) bool, from ...string) ([]V, error) {
+
+	result := make([]V, 0)
+
+	for _, item := range m.container {
+
+
+		
+		condition := where(item)
+
+		if condition {
+			result = append(result, item)
+		}
+	}
+
+	return result, nil
 }
 
 // SearchAll implements trait.CRUD.
