@@ -147,15 +147,25 @@ func (m *Map[K, V]) Values() []V {
 // Iterate implements trait.CRUD.
 // Iterate iterates over the map and applies the provided function to each key-value pair.
 // If the function returns an error, the iteration stops.
-func (m *Map[K, V]) Iterate(fn func(K, V) error) {
+// If the function returns true, the iteration stops.
+func (m *Map[K, V]) Iterate(fn func(K, V) (stop bool, err error)) error {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
+	var outsideErr error
 
 	for k, v := range m.container {
-		if err := fn(k, v); err != nil {
-			return
+		stop, err := fn(k, v)
+
+		if err != nil {
+			outsideErr = err
+			break
+		}
+		if stop {
+			break
 		}
 	}
+
+	return outsideErr
 }
 
 // Clean implements trait.CRUD.

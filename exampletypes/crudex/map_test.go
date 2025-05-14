@@ -225,17 +225,17 @@ func TestMap_StringString(t *testing.T) {
 
 		listValues := make([]string, 0)
 
-		m.Iterate(func(k string, v string) error {
+		m.Iterate(func(k string, v string) (bool, error) {
 			listKeys = append(listKeys, k)
 			listValues = append(listValues, v)
-			return nil
+			return false, nil
 		})
 
 		assert.Equal(t, 6, len(listKeys))
 		assert.Equal(t, 6, len(listValues))
 	})
 
-	t.Run("iterate read with error", func(t *testing.T) {
+	t.Run("iterate read with stop", func(t *testing.T) {
 		m := crudex.NewMap[string, string]()
 		err := m.Create("1", "item1")
 		assert.NoError(t, err)
@@ -252,18 +252,52 @@ func TestMap_StringString(t *testing.T) {
 
 		listKeys := make([]string, 0)
 		listValues := make([]string, 0)
-		err = m.Iterate(func(k string, v string)error  {
+		err = m.Iterate(func(k string, v string) (bool, error) {
 			listKeys = append(listKeys, k)
 			listValues = append(listValues, v)
-			if k == "3" {
-				return crudex.ErrNotFound
+			if v == "item3" {
+				return true, nil
 			}
-			return nil
+			return false, nil
 		})
+		assert.NoError(t, err)
 
 		assert.Equal(t, 3, len(listKeys))
 		assert.Equal(t, 3, len(listValues))
-		assert.ErrorWithMessage(t, err, "Expected error to be %s, but was %s", crudex.ErrNotFound.Error(), err.Error())
+
+	})
+
+	t.Run("iterate write update stop", func(t *testing.T) {
+
+		m := crudex.NewMap[string, string]()
+		err := m.Create("1", "item1")
+		assert.NoError(t, err)
+		err = m.Create("2", "item2")
+		assert.NoError(t, err)
+		err = m.Create("3", "item3")
+		assert.NoError(t, err)
+		err = m.Create("4", "item4")
+		assert.NoError(t, err)
+		err = m.Create("5", "item5")
+		assert.NoError(t, err)
+		err = m.Create("6", "item6")
+		assert.NoError(t, err)
+
+		err = m.Iterate(func(k string, v string) (bool, error) {
+
+			if v == "item3" {
+
+				err := m.Update(k, "item3-updated")
+				return true, err
+			}
+
+			return false, nil
+		})
+		assert.NoError(t, err)
+		item, err := m.Read("3")
+		assert.NoError(t, err)
+		assert.Equal(t, "item3-updated", item)
+
 	})
 
 	t.Run("clean", func(t *testing.T) {
