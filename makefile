@@ -1,7 +1,7 @@
-TRAITS_VERSION = 0.2.0
+VERSION = 0.2.1
 
 updatev:
-		git tag v${TRAITS_VERSION} && git push origin v${TRAITS_VERSION}
+		git tag v${VERSION} && git push origin v${VERSION}
 
 
 
