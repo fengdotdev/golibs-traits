@@ -30,4 +30,7 @@ type CRUDWithCTX[K Indexable, V any] interface {
 	Keys(ctx context.Context) []K
 	Values(ctx context.Context) []V
 	All(ctx context.Context) map[K]V
+	Iterate(ctx context.Context, fn func(K, V) (stop bool, err error)) error
+	Clean(ctx context.Context)
+	Populate(ctx context.Context, items map[K]V)
 }
