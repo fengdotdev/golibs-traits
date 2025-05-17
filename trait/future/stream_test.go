@@ -1,7 +1,9 @@
-package main
+package future_test
 
 import (
 	"time"
+
+	"github.com/fengdotdev/golibs-traits/trait/future"
 )
 
 type Stream[T any] interface {
@@ -13,7 +15,7 @@ type Stream[T any] interface {
 	Stop()
 }
 
-var _ Stream[int] = (*IntStream)(nil)
+var _ future.Stream[int] = (*IntStream)(nil)
 
 type IntStream struct {
 	value chan int
@@ -61,53 +63,30 @@ func (i *IntStream) Stop() {
 }
 
 func NumberGenerator() *IntStream {
+
 	stream := NewIntStream()
-
-	// clock at 1 second
-
 	go func() {
-		i := 0
-		paused := false
-		for {
+		for i := 0; ; i++ {
+			time.Sleep(1 * time.Second)
 			select {
-			case p, ok := <-stream.pause:
-				if !ok {
-					return
-				}
-				paused = p
-			default:
-				if paused {
-					continue
-				}
-				select {
-				case stream.value <- i:
-					i++
-				default:
-					// evitar bloqueo si nadie está leyendo
-				}
-				time.Sleep(1 * time.Second)
-			}
-		}
-	}()
+			case <-stream.pause:
 
+			default:
+
+				stream.value <- i
+
+			}
+
+		}
+
+	}()
 	return stream
 }
-func TimeUP[T any](Stream Stream[T], timer time.Duration) {
+
+func TimeUP[T any](timer time.Duration, Stream Stream[T]) {
 	go func() {
 		time.Sleep(timer)
 		Stream.Stop()
-	}()
-}
-
-func IntermitenPause[T any](stream Stream[T], timer time.Duration) {
-	go func() {
-		for {
-
-			stream.Pause()
-			time.Sleep(timer)
-			stream.Resume()
-
-		}
 	}()
 }
 
@@ -123,12 +102,4 @@ func StreamReader(stream *IntStream) {
 			println(err.Error())
 		}
 	}
-}
-
-func main() {
-	stream := NumberGenerator()
-	TimeUP(stream, 30*time.Second)
-	IntermitenPause(stream, 5*time.Second)
-	StreamReader(stream)
-
 }
